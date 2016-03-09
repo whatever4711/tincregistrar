@@ -2,13 +2,13 @@ from django.shortcuts import render
 
 # Create your views here.
 from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_protect
+#from django.views.decorators.csrf import csrf_protect
 import simplejson
 
 def index(request):
     return HttpResponse("Hello world.")
 
-@csrf_protect
+#@csrf_protect
 def json(request):
     print(request)
     to_json = {
