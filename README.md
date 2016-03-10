@@ -3,24 +3,32 @@
 
 Build up Django application
 ```
-d-cp run web django-admin.py startproject composeexample .
-d-cp run web python manage.py startapp test
+docker-compose run web django-admin.py startproject composeexample .
+docker-compose run web python manage.py startapp test
 ```
 
 Commands:
 
 ```[bash]
 #!/bin/bash
-d-cp down -v
-d-cp build
-d-cp up -d
-sleep 2
-d-cp run web python manage.py migrate
-d-cp restart web
-d-cp run web python manage.py createsuperuser
+docker-compose up -d
+sleep 5
+docker-compose run web python manage.py makemigrations
+docker-compose run web python manage.py migrate
+docker-compose restart web
+docker-compose run web /bin/bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell"
 ```
 
 Debugging
 ```
 docker run -it -v $PWD:/usr/src/app  -p 8000:8000 --link tincregistrator_db_1:db --net="tincregistrator_default" tincregistrator_web /bin/bash
 ```
+
+Usage within curl:
+- Upload your tinc configuration with ```curl -X POST -T $YOURTINCCONFIG serverIP:8000/regService/config```
+- Get configuration of other clients with ```curl serverIP:8000/regService/config```
+
+TODOs
+
+- Adjustable private network
+- Support for several network names

@@ -1,18 +1,39 @@
 from django.shortcuts import render
 
 # Create your views here.
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
+from django.template import loader
+from .models import Node
+from .logic import NodeParser as Parser
 #from django.views.decorators.csrf import csrf_protect
-import simplejson
+#import simplejson
 
 def index(request):
-    return HttpResponse("Hello world.")
+    node_list = Node.objects.order_by('public_IP')
+    template = loader.get_template('regService/index.html')
+    context = {
+        'node_list': node_list,
+    }
+    return HttpResponse(template.render(context, request))
 
 #@csrf_protect
-def json(request):
-    print(request)
-    to_json = {
-        "key1": "value1",
-        "key2": "value2"
-    }
-    return HttpResponse(simplejson.dumps(to_json), content_type='application/json')
+def config(request):
+    if request.method == "POST":
+        s = request.body.decode("utf-8")
+        p = Parser()
+        p.parseInput(s)
+
+        node = Node.objects.create_Node(p)
+        p.parseNode(node)
+        return HttpResponse(str(p))
+    elif request.method == "GET":
+        node_list = Node.objects.all()
+
+        p = Parser()
+        response=[]
+        for node in node_list:
+            p.parseNode(node)
+            response.append(str(p))
+        return HttpResponse('\n'.join(response))
+    else:
+        raise Http404("Invalid Request")

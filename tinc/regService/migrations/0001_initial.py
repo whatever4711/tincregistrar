@@ -17,8 +17,10 @@ class Migration(migrations.Migration):
             name='Node',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('hostname', models.CharField(default='', max_length=100, verbose_name='hostname')),
                 ('public_IP', models.GenericIPAddressField(verbose_name='public IP')),
-                ('private_IP', models.GenericIPAddressField(verbose_name='private IP')),
+                ('private_IP', models.GenericIPAddressField(default='10.0.0.1', verbose_name='private IP')),
+                ('private_SN', models.PositiveSmallIntegerField(default=32, verbose_name='private Subnet')),
                 ('pub_key', models.TextField(verbose_name='pub Key')),
             ],
         ),
