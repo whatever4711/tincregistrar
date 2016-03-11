@@ -163,11 +163,13 @@ function remove(){
 function start(){
   echo "enable"
   enable_autostart
-  systemctl start tinc.service
+#  systemctl start tinc.service
+  service tinc start
 }
 
 function stop(){
-  systemctl stop tinc.service
+#  systemctl stop tinc.service
+  service tinc stop
   echo "disable"
   disable_autostart
 }
