@@ -39,8 +39,8 @@ def config(request):
         for node in node_list:
             p.parseNode(node)
             response.append(str(p))
-            response.append('%\n')
-        return HttpResponse('\n'.join(response))
+            response.append('%')
+        return HttpResponse(''.join(response))
 
     elif request.method == "DELETE":
         ip = request.META['REMOTE_ADDR']
