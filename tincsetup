@@ -1,0 +1,203 @@
+#!/usr/bin/env bash
+
+
+#CONFIG_SERVER="192.168.200.49:8000"
+CONFIG_SERVER="172.19.0.2:8000"
+
+EXPECTED_NODES=2
+POLL_TIMEOUT=300
+#INTERFACE="eth0"
+
+TINC_NETWORKNAME="demo"
+TINC_KEYLENGTH="1024"
+TINC_INTERFACE="tun0"
+
+#######################
+# generated parameter #
+#######################
+HOSTNAME=${HOSTNAME//[\-\_\.\s]/}
+TINC_PATH="/etc/tinc"
+NODE_HOST_FILES="${TINC_PATH}/${TINC_NETWORKNAME}/hosts"
+NODE_CONFIG_FILE="${TINC_PATH}/${TINC_NETWORKNAME}/tinc.conf"
+
+#######################
+
+function get_ip_of_interface(){
+  local interface="${1}"
+  local all_ip_addresses=$(hostname -I)
+  local interface_ip=$(ip a s "$interface" 2>/dev/null)
+  for ip_address in $all_ip_addresses; do
+    if [[ "$interface_ip" == *"$ip_address"* ]]; then
+      echo "$ip_address"
+    fi
+  done
+}
+
+function enable_autostart(){
+  if [[ ($(grep -c "${TINC_NETWORKNAME}" "${TINC_PATH}/nets.boot") -eq 0) ]]; then
+    echo "${TINC_NETWORKNAME}" >> "${TINC_PATH}/nets.boot"
+  fi
+}
+
+function disable_autostart(){
+  if [[ $(grep -c "${TINC_NETWORKNAME}" "${TINC_PATH}/nets.boot") -gt 0 ]]; then
+    sed -i '' "s/${TINC_NETWORKNAME}\n//g" > ${TINC_PATH}/nets.boot
+  fi
+}
+
+function prepare_tinc_config(){
+mkdir -p "${NODE_HOST_FILES}/"
+
+cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
+#!/bin/sh
+IP="\$(grep Subnet "${NODE_HOST_FILES}/${HOSTNAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
+ifconfig "\${INTERFACE}" "\${IP}" netmask 255.255.255.0
+EOM
+chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
+
+cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-down"
+#!/bin/sh
+ifconfig "\${INTERFACE}" down
+EOM
+chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-down"
+}
+
+function create_tinc_config(){
+cat << EOM > "${NODE_CONFIG_FILE}"
+Name = ${HOSTNAME}
+AddressFamily = ipv4
+Interface = ${TINC_INTERFACE}
+EOM
+
+if [[ -z "${INTERFACE}" ]]; then
+  IP="$(get_ip_of_interface ${INTERFACE})"
+  echo -e "# Hostname = ${HOSTNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+else
+  echo -e "# Hostname = ${HOSTNAME}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+fi
+tincd -n ${TINC_NETWORKNAME} -K${TINC_KEYLENGTH}
+}
+
+function publish_config(){
+  #send own config
+  temp=$(curl --silent -X POST -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config")
+  echo -e "$temp" > "${NODE_HOST_FILES}/${HOSTNAME}"
+}
+
+function get_configs(){
+  #receive all other configs
+  others="$(curl --silent "${CONFIG_SERVER}/regService/config")"
+
+#others=$(cat temp)
+  echo "${others}"
+  echo -e "${others}" > temp
+
+  regex="#\sHostname\s=\s([A-Za-z0-9]*)"
+  OLD_IFS="$IFS"
+  IFS="%"
+  STR_ARRAY=( $others )
+  for x in "${STR_ARRAY[@]}"
+  do
+    [[ "$x" =~ ${regex} ]]
+    local name=${BASH_REMATCH[1]}
+
+    if [[ ! -f "${NODE_HOST_FILES}/$name" ]]; then
+      echo $x > "${NODE_HOST_FILES}/$name"
+    fi
+
+    if [[ "$HOSTNAME" != "$name" ]]; then
+      if [[ ($(grep -c "ConnectTo = $name" "${NODE_CONFIG_FILE}") -eq 0) ]]; then
+        echo "ConnectTo = $name" >> "${NODE_CONFIG_FILE}"
+      fi
+    fi
+  done
+  IFS="$OLD_IFS"
+}
+
+function poll_configs(){
+  while true; do
+    get_configs
+    if [[ $(ls "${NODE_HOST_FILES}/" | wc -w) -eq $EXPECTED_NODES ]]; then
+      return
+    fi
+    sleep 5
+  done
+}
+
+function delete_config(){
+  curl --silent -X DELETE -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config"
+}
+
+function create(){
+  echo "prepare"
+  prepare_tinc_config
+  echo "configure"
+  create_tinc_config
+  echo "publishconfig"
+  publish_config
+  echo "get all configs"
+  timeout ${POLL_TIMEOUT} poll_configs
+}
+
+function remove(){
+  echo "remove network ${TINC_NETWORKNAME}"
+  rm -rf "${TINC_PATH}/${TINC_NETWORKNAME}"
+  delete_config
+}
+
+function start(){
+  echo "enable"
+  enable_autostart
+  systemctl start tinc.service
+}
+
+function stop(){
+  systemctl stop tinc.service
+  echo "disable"
+  disable_autostart
+}
+
+usage () {
+cat << EOM
+usage:
+
+  tincsetup start           Start Tinc
+
+  tincsetup stop            Stop Tinc.
+
+  tincsetup create          Create new tinc configuration.
+
+  tincsetup remove          Remove tinc configuration.
+
+  tincsetup pullconfig      Get all configs from tincregistrator
+
+EOM
+}
+
+if [[ $DEBUG == "true" ]]; then
+  eval "$@"
+elif [ $# -eq 1 ]; then
+  CL_ARGUMENT="${1}"
+  case "$1" in
+    "start" )
+      start
+      ;;
+    "stop" )
+      stop
+      ;;
+    "create" )
+      create
+      ;;
+    "remove" )
+      remove
+      ;;
+    "pullconfig" )
+      get_configs
+      ;;
+    * )
+      usage
+      ;;
+  esac
+else
+  usage
+fi
