@@ -16,7 +16,6 @@ class NodeManager(models.Manager):
             IP = str(IPv4Address(ip_list[0].private_IP) + 1)
 
         if Node.objects.filter(public_IP=public_IP).exists():
-            # TODO Update existing node
             nodes = Node.objects.filter(public_IP=public_IP)
             node = nodes[0]
             node.hostname = parser.hostname
@@ -58,3 +57,8 @@ class Node(models.Model):
 
     def __str__(self):
         return '%s PubIP: %s' % (self.hostname, self.public_IP)
+
+class Network(models.Model):
+    netname = models.CharField('netname', default='tinc', max_length=100)
+    net = models.GenericIPAddressField('net', default="10.0.0.0")
+    netmask = models.PositiveSmallIntegerField('subnet', default=32)

@@ -21,7 +21,10 @@ docker exec tincregistrator_web_1 /bin/bash -c "echo \"from django.contrib.auth.
 
 Debugging
 ```
+# For Postgresql
 docker run -it -v $PWD:/usr/src/app  -p 8000:8000 --link tincregistrator_db_1:db --net="tincregistrator_default" tincregistrator_web /bin/bash
+# For Sqlite
+docker run -it -v $PWD:/usr/src/app -v tincregistrator_sqllitedb:/usr/src/app/tinc/data -p 8000:8000 --net="tincregistrator_default" tincregistrator_web /bin/bash
 ```
 
 Usage within curl:

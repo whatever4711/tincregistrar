@@ -23,6 +23,7 @@ def config(request):
         s = request.body.decode("utf-8")
         p = Parser()
         p.parseInput(s)
+
         ip = request.META['REMOTE_ADDR']
         node = Node.objects.create_Node(p, ip)
         p.parseNode(node)
@@ -45,7 +46,7 @@ def config(request):
     elif request.method == "DELETE":
         ip = request.META['REMOTE_ADDR']
         if Node.objects.delete_Node(ip):
-            return HttpResponse("DELETED")
+            return HttpResponse("DELETED %s" % ip)
         else:
             raise Http404("Node with IP %s not registered" % ip)
     else:

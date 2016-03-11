@@ -1,5 +1,9 @@
 version: '2'
 
+volumes:
+  sqllitedb:
+    driver: local
+
 services:
   #Uncomment for using PSQL
   #db:
@@ -10,6 +14,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - $PWD/tinc:/usr/src/app
+      - sqllitedb:/usr/src/app/data
     ports:
       - "8000:8000"
     #Uncomment for using PSQL
