@@ -113,7 +113,7 @@ function poll_configs(){
   while true; do
     get_configs
     if [[ $(ls "${NODE_HOST_FILES}/" | wc -w) -eq $EXPECTED_NODES ]]; then
-      return
+      return 0
     fi
     sleep 5
   done
@@ -131,7 +131,7 @@ function create(){
   echo "publishconfig"
   publish_config
   echo "get all configs"
-  timeout ${POLL_TIMEOUT} poll_configs
+  timeout ${POLL_TIMEOUT} "$(poll_configs)"
 }
 
 function remove(){
@@ -164,7 +164,7 @@ usage:
 
   tincsetup remove          Remove tinc configuration.
 
-  tincsetup pullconfig      Get all configs from tincregistrator
+  tincsetup pullconfig      Get all configs from tincregistrator.
 
 EOM
 }
