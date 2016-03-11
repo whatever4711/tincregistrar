@@ -35,5 +35,12 @@ def config(request):
             p.parseNode(node)
             response.append(str(p))
         return HttpResponse('\n'.join(response))
+    elif request.method == "DELETE":
+        s = request.body.decode("utf-8")
+        print(request.META['REMOTE_ADDR'])
+        p = Parser()
+        p.parseInput(s)
+        Node.objects.delete_Node(p)
+        return HttpResponse("DELETED")
     else:
         raise Http404("Invalid Request")

@@ -5,7 +5,6 @@ from ipaddress import IPv4Address
 class NodeManager(models.Manager):
     def create_Node(self, parser):
 
-
         if Node.objects.filter(public_IP=parser.public_ip).exists():
             node = Node.objects.filter(public_IP=parser.public_ip)
             return node[0]
@@ -23,6 +22,12 @@ class NodeManager(models.Manager):
             node.private_IP = IP
         node.save()
         return node
+
+    def delete_Node(self, parser):
+        if Node.objects.filter(public_IP=parser.public_ip).exists():
+            nodes = Node.objects.filter(public_IP=parser.public_ip)
+            for node in nodes:
+                node.delete()
 
 
     def random_name(self):

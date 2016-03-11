@@ -13,10 +13,10 @@ Commands:
 #!/bin/bash
 docker-compose up -d
 sleep 5
-docker-compose run web python manage.py makemigrations
-docker-compose run web python manage.py migrate
+docker exec tincregistrator_web_1 python manage.py makemigrations
+docker exec tincregistrator_web_1 python manage.py migrate
 docker-compose restart web
-docker-compose run web /bin/bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell"
+docker exec tincregistrator_web_1 /bin/bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell"
 ```
 
 Debugging
@@ -27,6 +27,7 @@ docker run -it -v $PWD:/usr/src/app  -p 8000:8000 --link tincregistrator_db_1:db
 Usage within curl:
 - Upload your tinc configuration with ```curl -X POST -T $YOURTINCCONFIG serverIP:8000/regService/config```
 - Get configuration of other clients with ```curl serverIP:8000/regService/config```
+- Delete your tinc configuration with ```curl -X DELETE -T $YOURTINCCONFIG serverIP:8000/regService/config```
 
 TODOs
 
