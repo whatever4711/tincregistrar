@@ -120,7 +120,7 @@ function poll_configs(){
 }
 
 function delete_config(){
-  curl --silent -X DELETE -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config"
+  curl --silent -X DELETE "${CONFIG_SERVER}/regService/config"
 }
 
 function create(){
