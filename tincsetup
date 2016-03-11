@@ -33,6 +33,16 @@ function get_ip_of_interface(){
   done
 }
 
+function evaluate_result(){
+  local returnvalue="${1}"
+  local message="${2}"
+  if [ "$returnvalue" -eq 0 ]; then
+    echo -e "\e[32m  [PASS] ${message}\e[0m"
+  else
+    echo -e "\e[31m  [FAIL] ${message}\e[0m"
+  fi
+}
+
 function enable_autostart(){
   if [[ ($(grep -c "${TINC_NETWORKNAME}" "${TINC_PATH}/nets.boot") -eq 0) ]]; then
     echo "${TINC_NETWORKNAME}" >> "${TINC_PATH}/nets.boot"
@@ -123,6 +133,16 @@ function delete_config(){
   curl --silent -X DELETE "${CONFIG_SERVER}/regService/config"
 }
 
+
+function test(){
+  for ONE_FILE in ; do
+    local NODE_NAME="$(basename "${ONE_FILE}")"
+    local NODE_IP="$(grep Subnet "${ONE_FILE}" |cut -d' ' -f3 | cut -d'/' -f1)"
+    ping -W 1 -c 2 ${NODE_IP} > /dev/null 2>&1
+    evaluate_result $? "  ${NODE_NAME} is pingable with IP ${NODE_IP}"
+  done
+}
+
 function create(){
   echo "prepare"
   prepare_tinc_config
@@ -165,6 +185,8 @@ usage:
   tincsetup remove          Remove tinc configuration.
 
   tincsetup pullconfig      Get all configs from tincregistrator.
+
+  tincsetup test            Ping all existing nodes.
 
 EOM
 }
