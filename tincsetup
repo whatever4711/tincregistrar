@@ -135,7 +135,7 @@ function delete_config(){
 
 
 function test(){
-  for ONE_FILE in ; do
+  for ONE_FILE in ${NODE_HOST_FILES}/* ; do
     local NODE_NAME="$(basename "${ONE_FILE}")"
     local NODE_IP="$(grep Subnet "${ONE_FILE}" |cut -d' ' -f3 | cut -d'/' -f1)"
     ping -W 1 -c 2 ${NODE_IP} > /dev/null 2>&1
