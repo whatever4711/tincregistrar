@@ -151,7 +151,7 @@ function create(){
   echo "publishconfig"
   publish_config
   echo "get all configs"
-  timeout ${POLL_TIMEOUT} "$(poll_configs)"
+  timeout ${POLL_TIMEOUT} cat <( poll_configs )
 }
 
 function remove(){
