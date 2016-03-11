@@ -5,6 +5,8 @@ from django.http import HttpResponse, Http404
 from django.template import loader
 from .models import Node
 from .logic import NodeParser as Parser
+from django.views.generic import View
+
 #from django.views.decorators.csrf import csrf_protect
 #import simplejson
 
@@ -17,9 +19,22 @@ def index(request):
     return HttpResponse(template.render(context, request))
 
 #@csrf_protect
-def config(request):
 
-    if request.method == "POST":
+
+class ConfigView(View):
+    
+    
+    def get(self, request, *args, **kwargs):
+        node_list = Node.objects.all()
+        p = Parser()
+        response=[]
+        for node in node_list:
+            p.parseNode(node)
+            response.append(str(p))
+            response.append('%')
+        return HttpResponse(''.join(response))
+
+    def post(self, request, *args, **kwargs):
         s = request.body.decode("utf-8")
         p = Parser()
         p.parseInput(s)
@@ -32,22 +47,11 @@ def config(request):
             response.append("# Your external IP is: %s\n" % ip)
         response.append(str(p))
         return HttpResponse(''.join(response))
-
-    elif request.method == "GET":
-        node_list = Node.objects.all()
-        p = Parser()
-        response=[]
-        for node in node_list:
-            p.parseNode(node)
-            response.append(str(p))
-            response.append('%')
-        return HttpResponse(''.join(response))
-
-    elif request.method == "DELETE":
+        
+    def delete(self, request, *args, **kwargs):  
         ip = request.META['REMOTE_ADDR']
         if Node.objects.delete_Node(ip):
             return HttpResponse("DELETED %s" % ip)
         else:
             raise Http404("Node with IP %s not registered" % ip)
-    else:
-        raise Http404("Invalid Request")
+
