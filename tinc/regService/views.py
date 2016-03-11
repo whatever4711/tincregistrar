@@ -22,7 +22,7 @@ def config(request):
         s = request.body.decode("utf-8")
         p = Parser()
         p.parseInput(s)
-
+        ip = request.META['REMOTE_ADDR']
         node = Node.objects.create_Node(p)
         p.parseNode(node)
         return HttpResponse(str(p))
