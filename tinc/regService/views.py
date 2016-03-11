@@ -18,30 +18,35 @@ def index(request):
 
 #@csrf_protect
 def config(request):
+
     if request.method == "POST":
         s = request.body.decode("utf-8")
         p = Parser()
         p.parseInput(s)
         ip = request.META['REMOTE_ADDR']
-        node = Node.objects.create_Node(p)
+        node = Node.objects.create_Node(p, ip)
         p.parseNode(node)
-        return HttpResponse(str(p))
+        response=[]
+        if p.config_ip is not ip:
+            response.append("# Your external IP is: %s\n" % ip)
+        response.append(str(p))
+        return HttpResponse(''.join(response))
+
     elif request.method == "GET":
         node_list = Node.objects.all()
-
         p = Parser()
         response=[]
         for node in node_list:
             p.parseNode(node)
             response.append(str(p))
-            response.append('######')
+            response.append('%\n')
         return HttpResponse('\n'.join(response))
+
     elif request.method == "DELETE":
-        s = request.body.decode("utf-8")
-        print(request.META['REMOTE_ADDR'])
-        p = Parser()
-        p.parseInput(s)
-        Node.objects.delete_Node(p)
-        return HttpResponse("DELETED")
+        ip = request.META['REMOTE_ADDR']
+        if Node.objects.delete_Node(ip):
+            return HttpResponse("DELETED")
+        else:
+            raise Http404("Node with IP %s not registered" % ip)
     else:
         raise Http404("Invalid Request")

@@ -10,7 +10,7 @@ class NodeParser:
     def __init__(self):
         self.hostname = ""
         self.rsa = ""
-        self.public_ip = ""
+        self.config_ip = ""
         self.subnet = ""
 
     def parseInput(self, txt):
@@ -20,7 +20,7 @@ class NodeParser:
             if address.startswith(self.hostnameComment):
                 self.hostname = address.replace(self.hostnameComment, '')
             if address.startswith(self.addressName):
-                self.public_ip = address.replace(self.addressName, '')
+                self.config_ip = address.replace(self.addressName, '')
             if address.startswith(self.subnetName):
                 self.subnet = address.replace(self.subnetName, '')
         self.rsa = spl[1].split(self.endRSA)[0].replace('\n', '')
@@ -28,7 +28,7 @@ class NodeParser:
     def parseNode(self, Node):
         self.hostname = Node.hostname
         self.rsa = Node.pub_key
-        self.public_ip = Node.public_IP
+        self.config_ip = Node.config_IP
         self.subnet = ''.join([Node.private_IP, '/', str(Node.private_SN)])
 
     def splitRSA(self,n):
@@ -45,7 +45,7 @@ class NodeParser:
         sos.append(self.hostname)
         sos.append('\n')
         sos.append(self.addressName)
-        sos.append(self.public_ip)
+        sos.append(self.config_ip)
         sos.append('\n')
         sos.append(self.subnetName)
         sos.append(self.subnet)
