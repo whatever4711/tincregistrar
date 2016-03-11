@@ -34,6 +34,7 @@ def config(request):
         for node in node_list:
             p.parseNode(node)
             response.append(str(p))
+            response.append('######')
         return HttpResponse('\n'.join(response))
     elif request.method == "DELETE":
         s = request.body.decode("utf-8")
