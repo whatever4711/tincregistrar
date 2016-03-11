@@ -85,29 +85,24 @@ function publish_config(){
 }
 
 function get_configs(){
-  #receive all other configs
-  others="$(curl --silent "${CONFIG_SERVER}/regService/config")"
+  local ALL_CONFIGS="$(curl --silent "${CONFIG_SERVER}/regService/config")"
 
-#others=$(cat temp)
-  echo "${others}"
-  echo -e "${others}" > temp
-
-  regex="#\sHostname\s=\s([A-Za-z0-9]*)"
-  OLD_IFS="$IFS"
+  local regex="#\sHostname\s=\s([A-Za-z0-9]*)"
+  local OLD_IFS="$IFS"
   IFS="%"
-  STR_ARRAY=( $others )
-  for x in "${STR_ARRAY[@]}"
+  local CONFIG_ARRAY=( $ALL_CONFIGS )
+  for ONE_CONFIG in "${CONFIG_ARRAY[@]}"
   do
-    [[ "$x" =~ ${regex} ]]
-    local name=${BASH_REMATCH[1]}
+    [[ "$ONE_CONFIG" =~ ${regex} ]]
+    local NODE_NAME=${BASH_REMATCH[1]}
 
-    if [[ ! -f "${NODE_HOST_FILES}/$name" ]]; then
-      echo $x > "${NODE_HOST_FILES}/$name"
+    if [[ ! -f "${NODE_HOST_FILES}/$NODE_NAME" ]]; then
+      echo $ONE_CONFIG > "${NODE_HOST_FILES}/$NODE_NAME"
     fi
 
-    if [[ "$HOSTNAME" != "$name" ]]; then
-      if [[ ($(grep -c "ConnectTo = $name" "${NODE_CONFIG_FILE}") -eq 0) ]]; then
-        echo "ConnectTo = $name" >> "${NODE_CONFIG_FILE}"
+    if [[ "$HOSTNAME" != "$NODE_NAME" ]]; then
+      if [[ ($(grep -c "ConnectTo = $NODE_NAME" "${NODE_CONFIG_FILE}") -eq 0) ]]; then
+        echo "ConnectTo = $NODE_NAME" >> "${NODE_CONFIG_FILE}"
       fi
     fi
   done
