@@ -51,7 +51,7 @@ function enable_autostart(){
 
 function disable_autostart(){
   if [[ $(grep -c "${TINC_NETWORKNAME}" "${TINC_PATH}/nets.boot") -gt 0 ]]; then
-    sed -i '' "s/${TINC_NETWORKNAME}\n//g" > ${TINC_PATH}/nets.boot
+    sed -i "s/${TINC_NETWORKNAME}\n//g" "${TINC_PATH}/nets.boot"
   fi
 }
 
