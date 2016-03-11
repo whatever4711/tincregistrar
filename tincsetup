@@ -213,6 +213,9 @@ elif [ $# -eq 1 ]; then
     "pullconfig" )
       get_configs
       ;;
+    "test" )
+      test
+      ;;
     * )
       usage
       ;;
