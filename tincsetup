@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 
-
-#CONFIG_SERVER="192.168.200.49:8000"
-CONFIG_SERVER="172.19.0.2:8000"
+CONFIG_SERVER="192.168.178.55:8000"
 
 EXPECTED_NODES=2
 POLL_TIMEOUT=300
@@ -55,40 +53,11 @@ function disable_autostart(){
   fi
 }
 
-function prepare_tinc_config(){
-mkdir -p "${NODE_HOST_FILES}/"
-
-cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
-#!/bin/sh
-IP="\$(grep Subnet "${NODE_HOST_FILES}/${HOSTNAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
-ifconfig "\${INTERFACE}" "\${IP}" netmask 255.255.255.0
-EOM
-chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
-
-cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-down"
-#!/bin/sh
-ifconfig "\${INTERFACE}" down
-EOM
-chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-down"
+function delete_config(){
+  curl --silent -X DELETE "${CONFIG_SERVER}/regService/config"
 }
 
-function create_tinc_config(){
-cat << EOM > "${NODE_CONFIG_FILE}"
-Name = ${HOSTNAME}
-AddressFamily = ipv4
-Interface = ${TINC_INTERFACE}
-EOM
-
-if [[ -z "${INTERFACE}" ]]; then
-  IP="$(get_ip_of_interface ${INTERFACE})"
-  echo -e "# Hostname = ${HOSTNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
-else
-  echo -e "# Hostname = ${HOSTNAME}" > "${NODE_HOST_FILES}/${HOSTNAME}"
-fi
-tincd -n ${TINC_NETWORKNAME} -K${TINC_KEYLENGTH}
-}
-
-function publish_config(){
+function post_config(){
   #send own config
   temp=$(curl --silent -X POST -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config")
   echo -e "$temp" > "${NODE_HOST_FILES}/${HOSTNAME}"
@@ -129,10 +98,36 @@ function poll_configs(){
   done
 }
 
-function delete_config(){
-  curl --silent -X DELETE "${CONFIG_SERVER}/regService/config"
-}
+function create_tinc_config(){
+mkdir -p "${NODE_HOST_FILES}/"
 
+cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
+#!/bin/sh
+IP="\$(grep Subnet "${NODE_HOST_FILES}/${HOSTNAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
+ifconfig "\${INTERFACE}" "\${IP}" netmask 255.255.255.0
+EOM
+chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
+
+cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-down"
+#!/bin/sh
+ifconfig "\${INTERFACE}" down
+EOM
+chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-down"
+
+cat << EOM > "${NODE_CONFIG_FILE}"
+Name = ${HOSTNAME}
+AddressFamily = ipv4
+Interface = ${TINC_INTERFACE}
+EOM
+
+if [[ -z "${INTERFACE}" ]]; then
+  IP="$(get_ip_of_interface ${INTERFACE})"
+  echo -e "# Hostname = ${HOSTNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+else
+  echo -e "# Hostname = ${HOSTNAME}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+fi
+tincd -n ${TINC_NETWORKNAME} -K${TINC_KEYLENGTH}
+}
 
 function test(){
   for ONE_FILE in ${NODE_HOST_FILES}/* ; do
@@ -144,19 +139,19 @@ function test(){
 }
 
 function create(){
-  echo "prepare"
-  prepare_tinc_config
   echo "configure"
   create_tinc_config
-  echo "publishconfig"
-  publish_config
+  echo "post config to tincregistrator"
+  post_config
   echo "get all configs"
   timeout ${POLL_TIMEOUT} cat <( poll_configs )
 }
 
 function remove(){
+  stop
   echo "remove network ${TINC_NETWORKNAME}"
   rm -rf "${TINC_PATH}/${TINC_NETWORKNAME}"
+  echo "delete config from tincregistrator"
   delete_config
 }
 
@@ -196,7 +191,6 @@ EOM
 if [[ $DEBUG == "true" ]]; then
   eval "$@"
 elif [ $# -eq 1 ]; then
-  CL_ARGUMENT="${1}"
   case "$1" in
     "start" )
       start
