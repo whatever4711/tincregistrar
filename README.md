@@ -1,13 +1,13 @@
 # tincregistrator
 
 
-Build up Django application
+## Build up Django application
 ```
 docker-compose run web django-admin.py startproject composeexample .
 docker-compose run web python manage.py startapp test
 ```
 
-Commands:
+### Commands:
 
 ```[bash]
 #!/bin/bash
@@ -19,7 +19,7 @@ docker-compose restart web
 docker exec tincregistrator_web_1 /bin/bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell"
 ```
 
-Debugging
+### Debugging
 ```
 docker run -it -v $PWD:/usr/src/app  -p 8000:8000 --link tincregistrator_db_1:db --net="tincregistrator_default" tincregistrator_web /bin/bash
 ```
@@ -28,6 +28,23 @@ Usage within curl:
 - Upload your tinc configuration with ```curl -X POST -T $YOURTINCCONFIG serverIP:8000/regService/config```
 - Get configuration of other clients with ```curl serverIP:8000/regService/config```
 - Delete your tinc configuration with ```curl -X DELETE serverIP:8000/regService/config```
+
+## Client
+### Just install tinc with:
+```
+sudo modprobe tun
+
+sudo apt-get update && sudo apt-get install -y tinc
+echo tun | sudo tee -a /etc/modules
+
+```
+### Edit ./tincsetup
+Enter your `CONFIG_SERVER` and / or the other parameters at the top.
+
+### Start using tinc
+Now you can use `chmod a+x ./tincsetup && ./tincsetup` to configure your network.
+
+
 
 TODOs
 
