@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIG_SERVER="192.168.178.55:8000"
+CONFIG_SERVER=${CONFIG_SERVER:-"192.168.178.55:8000"}
 
 EXPECTED_NODES=2
 POLL_TIMEOUT=300
@@ -103,7 +103,10 @@ mkdir -p "${NODE_HOST_FILES}/"
 
 cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
 #!/bin/sh
-IP="\$(grep Subnet "${NODE_HOST_FILES}/${HOSTNAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
+
+
+
+IP="\$(grep Subnet "/etc/tinc/\${NETNAME}/hosts/\${NAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
 ifconfig "\${INTERFACE}" "\${IP}" netmask 255.255.255.0
 EOM
 chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
