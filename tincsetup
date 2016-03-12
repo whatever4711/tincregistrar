@@ -99,7 +99,7 @@ function get_configs(){
 function poll_configs(){
   while true; do
     get_configs
-    if [[ $(ls "${NODE_HOST_FILES}/" | wc -w) -eq $EXPECTED_NODES ]]; then
+    if [[ $(ls "${NODE_HOST_FILES}/" | wc -w) -gt ${EXPECTED_NODES} ]]; then
       return 0
     fi
     sleep 5
