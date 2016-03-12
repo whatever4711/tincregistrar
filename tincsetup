@@ -54,7 +54,12 @@ function disable_autostart(){
 }
 
 function delete_config(){
-  curl --silent -X DELETE "${CONFIG_SERVER}/regService/config"
+  local response="$(curl --silent -X DELETE "${CONFIG_SERVER}/regService/config")"
+  if [[ "${response}" == "DELETED" ]]; then
+    echo "${response}"
+  else
+    echo "Something went wrong"
+  fi
 }
 
 function post_config(){
