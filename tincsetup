@@ -66,7 +66,6 @@ function post_config(){
 function get_configs(){
   local ALL_CONFIGS="$(curl --silent "${CONFIG_SERVER}/regService/config")"
 
-  # remove old config
   sed -i -e '/ConnectTo.*/d' "${NODE_CONFIG_FILE}"
   rm -rf "${NODE_HOST_FILES}/*"
 
