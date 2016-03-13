@@ -43,7 +43,12 @@ class ConfigView(View):
         ip = request.META['REMOTE_ADDR']
         secret_uncleaned = request.META["HTTP_AUTHORIZATION"]
         
-        secret = secret_uncleaned.split(" ")[1]
+        secret_split = secret_uncleaned.split(" ")
+        
+        if secret_split.length <= 1:
+            secret = uuid.uuid1()
+        else:
+            secret = secret_split[1]
         
         
         obj, created = Network.objects.get_or_create(secret=secret)
