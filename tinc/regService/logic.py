@@ -23,6 +23,7 @@ class NodeParser:
                 self.hostname = address.replace(self.hostnameComment, '')
             if address.startswith(self.networknameComment):
                 self.networkname = address.replace(self.networknameComment, '')
+                print(self.networkname)
             if address.startswith(self.addressName):
                 self.config_ip = address.replace(self.addressName, '')
             if address.startswith(self.subnetName):
