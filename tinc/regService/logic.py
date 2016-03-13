@@ -31,7 +31,7 @@ class NodeParser:
 
     def parseNode(self, Node):
         self.hostname = Node.hostname
-        self.networkname = Node.networkname
+        self.network = Node.network.netname
         self.rsa = Node.pub_key
         self.config_ip = Node.config_IP
         self.subnet = ''.join([Node.private_IP, '/', str(Node.private_SN)])
