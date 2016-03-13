@@ -45,7 +45,7 @@ class ConfigView(View):
         
         secret_split = secret_uncleaned.split(" ")
         
-        if secret_split.length <= 1:
+        if len(secret_split) <= 1:
             secret = uuid.uuid1()
         else:
             secret = secret_split[1]
