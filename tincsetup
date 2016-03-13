@@ -71,6 +71,7 @@ function post_config(){
 }
 
 function get_configs(){
+
   local ALL_CONFIGS="$(curl --silent -H "Authorization: ${AUTH_TOKEN}" "${CONFIG_SERVER}/regService/config")"
 
   sed -i -e '/ConnectTo.*/d' "${NODE_CONFIG_FILE}"
