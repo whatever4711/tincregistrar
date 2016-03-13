@@ -27,7 +27,7 @@ class ConfigView(View):
     
     def get(self, request, *args, **kwargs):
         node_list = Node.objects.all()
-        p = Parser()
+        p = Parser()network_obj
         response=[]
         for node in node_list:
             p.parseNode(node)
@@ -45,7 +45,7 @@ class ConfigView(View):
         #secret = request.META["Authorization"]
         
         obj, created = Network.objects.get_or_create(secret=p.networkname)
-        node = Node.objects.create_Node(p, ip, network_obj)
+        node = Node.objects.create_Node(p, ip, obj)
         
         
     
