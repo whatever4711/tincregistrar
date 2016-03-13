@@ -2,6 +2,7 @@ from .models import Node
 
 class NodeParser:
     hostnameComment = "# Hostname = "
+    networknameComment = "# NetworkName = "
     beginRSA = "-----BEGIN RSA PUBLIC KEY-----"
     endRSA = "-----END RSA PUBLIC KEY-----"
     addressName = "Address = "
@@ -19,6 +20,8 @@ class NodeParser:
         for address in addresses:
             if address.startswith(self.hostnameComment):
                 self.hostname = address.replace(self.hostnameComment, '')
+            if address.startswith(self.networknameComment):
+                self.networkname = address.replace(self.networknameComment, '')
             if address.startswith(self.addressName):
                 self.config_ip = address.replace(self.addressName, '')
             if address.startswith(self.subnetName):
@@ -27,6 +30,7 @@ class NodeParser:
 
     def parseNode(self, Node):
         self.hostname = Node.hostname
+        self.networkname = Node.networkname
         self.rsa = Node.pub_key
         self.config_ip = Node.config_IP
         self.subnet = ''.join([Node.private_IP, '/', str(Node.private_SN)])

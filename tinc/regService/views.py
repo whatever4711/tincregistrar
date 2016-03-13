@@ -40,11 +40,29 @@ class ConfigView(View):
         p.parseInput(s)
 
         ip = request.META['REMOTE_ADDR']
+        print(self.request)
+        #secret = request.META["Authorization"]
+        
+        
         node = Node.objects.create_Node(p, ip)
+        
+        obj, created = Network.objects.get_or_create(secret=p.networkname)
+    
+        
         p.parseNode(node)
         response=[]
         if p.config_ip is not ip:
             response.append("# Your external IP is: %s\n" % ip)
+            
+        if created:
+            response.append("# New network created!")
+        else:
+            response.append("# Network already exists.")
+            
+
+        response.append("# NetworkName: {}".format(p.networkname))
+        response.append("# Network already exists.")
+            
         response.append(str(p))
         return HttpResponse(''.join(response))
         
