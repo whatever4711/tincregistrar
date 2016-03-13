@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+admin.site.site_header = 'tinc Registrator'
+
 urlpatterns = [
     url(r'^regService/', include('regService.urls')),
     url(r'^admin/', admin.site.urls, name='admin_site'),
