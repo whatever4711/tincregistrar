@@ -46,6 +46,7 @@ class NodeManager(models.Manager):
 
 # Create your models here.
 class Node(models.Model):
+    network = models.ForignKey(Network)
     hostname = models.CharField('hostname', default='', max_length=100)
     public_IP = models.GenericIPAddressField('public IP')
     config_IP = models.GenericIPAddressField('config IP')
@@ -62,3 +63,4 @@ class Network(models.Model):
     netname = models.CharField('netname', default='tinc', max_length=100)
     net = models.GenericIPAddressField('net', default="10.0.0.0")
     netmask = models.PositiveSmallIntegerField('subnet', default=32)
+    secret = models.CharField('secret', max_length=32)
