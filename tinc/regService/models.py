@@ -1,6 +1,7 @@
 import names
 from django.db import models
 from ipaddress import IPv4Address
+import uuid
 
 class NodeManager(models.Manager):
     def create_Node(self, parser, public_IP, network_obj):
@@ -68,3 +69,8 @@ class Node(models.Model):
 
     def __str__(self):
         return self.hostname
+    
+    def create(self, *args, **kwargs):
+        obj = super(Node, self).create(*args, **kwargs)
+        obj.secret = uuid.uuid1()
+        obj.save()

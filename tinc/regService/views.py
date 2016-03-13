@@ -54,15 +54,8 @@ class ConfigView(View):
         response=[]
         if p.config_ip is not ip:
             response.append("# Your external IP is: %s\n" % ip)
-            
-        if created:
-            response.append("# New network created!")
-        else:
-            response.append("# Network already exists.")
-            
 
-        response.append("# NetworkName: {}".format(p.networkname))
-        response.append("# Network already exists.")
+        response.append("# NetworkName: {}\n".format(p.networkname))
             
         response.append(str(p))
         return HttpResponse(''.join(response))
