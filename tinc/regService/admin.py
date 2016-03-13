@@ -4,4 +4,12 @@ from django.contrib import admin
 
 from .models import Node
 
-admin.site.register(Node)
+class NodeAdmin(models.Admin):
+  list_display
+  list_filter = ('network', 'hostname', 'public_IP', 'config_IP', 'private_IP',)
+  list_display = ('hostname', 'public_IP', 'config_IP', 'private_IP', )
+
+admin.site.register(Node, NodeAdmin)
+
+
+admin.site.register(Network)
