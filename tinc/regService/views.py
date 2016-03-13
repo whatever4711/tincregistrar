@@ -53,6 +53,8 @@ class ConfigView(View):
         
         
         obj, created = Network.objects.get_or_create(secret=secret)
+        obj.netname = p.networkname
+        
         node = Node.objects.create_Node(p, ip, obj)
         
         
