@@ -20,9 +20,7 @@ def index(request):
 
 #@csrf_protect
 
-
 class ConfigView(View):
-    
     
     def get(self, request, *args, **kwargs):
         node_list = Node.objects.all()
@@ -47,11 +45,10 @@ class ConfigView(View):
             response.append("# Your external IP is: %s\n" % ip)
         response.append(str(p))
         return HttpResponse(''.join(response))
-        
-    def delete(self, request, *args, **kwargs):  
+
+    def delete(self, request, *args, **kwargs):
         ip = request.META['REMOTE_ADDR']
         if Node.objects.delete_Node(ip):
             return HttpResponse("DELETED %s" % ip)
         else:
             raise Http404("Node with IP %s not registered" % ip)
-

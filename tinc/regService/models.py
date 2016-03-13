@@ -22,7 +22,8 @@ class NodeManager(models.Manager):
             node.pub_key = parser.rsa
             node.config_IP = parser.config_ip
         else:
-            node = self.create(hostname=parser.hostname, public_IP=public_IP, config_IP=parser.config_ip, pub_key=parser.rsa)
+            node = self.create(hostname=parser.hostname, public_IP=public_IP,
+                config_IP=parser.config_ip, pub_key=parser.rsa)
         if IP:
             node.private_IP = IP
 
