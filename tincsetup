@@ -135,9 +135,9 @@ EOM
 
 if [[ -z "${INTERFACE}" ]]; then
   IP="$(get_ip_of_interface ${INTERFACE})"
-  echo -e "# Hostname = ${HOSTNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+  echo -e "# Hostname = ${HOSTNAME}\n# NetworkName = ${TINC_NETWORKNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
 else
-  echo -e "# Hostname = ${HOSTNAME}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+  echo -e "# Hostname = ${HOSTNAME}\n# NetworkName = ${TINC_NETWORKNAME}" > "${NODE_HOST_FILES}/${HOSTNAME}"
 fi
 tincd -n ${TINC_NETWORKNAME} -K${TINC_KEYLENGTH}
 }
