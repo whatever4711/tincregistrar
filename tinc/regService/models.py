@@ -69,8 +69,8 @@ class Node(models.Model):
 
     def __str__(self):
         return self.hostname
-    
-    def create(self, *args, **kwargs):
-        obj = super(Node, self).create(*args, **kwargs)
+
+    def get_or_create(self, *args, **kwargs):
+        obj = super(Node, self).get_or_create(*args, **kwargs)
         obj.secret = uuid.uuid1()
         obj.save()

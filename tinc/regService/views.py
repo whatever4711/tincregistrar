@@ -41,10 +41,12 @@ class ConfigView(View):
         p.parseInput(s)
 
         ip = request.META['REMOTE_ADDR']
-        print(self.request.__dict__)
-        #secret = request.META["Authorization"]
+        secret_uncleaned = request.META["HTTP_AUTHORIZATION"]
         
-        obj, created = Network.objects.get_or_create(secret=p.networkname)
+        secret = secret_uncleaned.split(" ")[1]
+        
+        
+        obj, created = Network.objects.get_or_create(secret=secret)
         node = Node.objects.create_Node(p, ip, obj)
         
         
