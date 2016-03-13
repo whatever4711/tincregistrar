@@ -41,7 +41,7 @@ class ConfigView(View):
         p.parseInput(s)
 
         ip = request.META['REMOTE_ADDR']
-        print(self.request)
+        print(self.request.__dict__)
         #secret = request.META["Authorization"]
         
         obj, created = Network.objects.get_or_create(secret=p.networkname)
