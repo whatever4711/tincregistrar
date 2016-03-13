@@ -49,6 +49,9 @@ class Network(models.Model):
     net = models.GenericIPAddressField('net', default="10.0.0.0")
     netmask = models.PositiveSmallIntegerField('subnet', default=32)
     secret = models.CharField('secret', max_length=32)
+    
+    def __str__(self):
+        return self.netname
 
 
 # Create your models here.
@@ -64,4 +67,4 @@ class Node(models.Model):
     objects = NodeManager()
 
     def __str__(self):
-        return '%s PubIP: %s' % (self.hostname, self.public_IP)
+        return self.hostname
