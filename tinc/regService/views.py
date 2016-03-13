@@ -4,6 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.template import loader
 from .models import Node
+from .models import Network
 from .logic import NodeParser as Parser
 from django.views.generic import View
 
