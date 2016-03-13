@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIG_SERVER="192.168.178.55:8000"
+CONFIG_SERVER=${CONFIG_SERVER:-"192.168.178.55:8000"}
 
 EXPECTED_NODES=2
 POLL_TIMEOUT=300
@@ -54,7 +54,12 @@ function disable_autostart(){
 }
 
 function delete_config(){
-  curl --silent -X DELETE "${CONFIG_SERVER}/regService/config"
+  local response="$(curl --silent -X DELETE "${CONFIG_SERVER}/regService/config")"
+  if [[ "${response}" == "DELETED" ]]; then
+    echo "${response}"
+  else
+    echo "Something went wrong"
+  fi
 }
 
 function post_config(){
@@ -65,6 +70,9 @@ function post_config(){
 
 function get_configs(){
   local ALL_CONFIGS="$(curl --silent "${CONFIG_SERVER}/regService/config")"
+
+  sed -i -e '/ConnectTo.*/d' "${NODE_CONFIG_FILE}"
+  rm -rf "${NODE_HOST_FILES}/*"
 
   local regex="#\sHostname\s=\s([A-Za-z0-9]*)"
   local OLD_IFS="$IFS"
@@ -91,7 +99,7 @@ function get_configs(){
 function poll_configs(){
   while true; do
     get_configs
-    if [[ $(ls "${NODE_HOST_FILES}/" | wc -w) -eq $EXPECTED_NODES ]]; then
+    if [[ $(ls "${NODE_HOST_FILES}/" | wc -w) -gt ${EXPECTED_NODES} ]]; then
       return 0
     fi
     sleep 5
@@ -103,7 +111,10 @@ mkdir -p "${NODE_HOST_FILES}/"
 
 cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
 #!/bin/sh
-IP="\$(grep Subnet "${NODE_HOST_FILES}/${HOSTNAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
+
+
+
+IP="\$(grep Subnet "/etc/tinc/\${NETNAME}/hosts/\${NAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
 ifconfig "\${INTERFACE}" "\${IP}" netmask 255.255.255.0
 EOM
 chmod a+x "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
