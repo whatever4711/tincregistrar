@@ -43,10 +43,10 @@ class ConfigView(View):
         print(self.request)
         #secret = request.META["Authorization"]
         
-        
-        node = Node.objects.create_Node(p, ip)
-        
         obj, created = Network.objects.get_or_create(secret=p.networkname)
+        node = Node.objects.create_Node(p, ip, network_obj)
+        
+        
     
         
         p.parseNode(node)

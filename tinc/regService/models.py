@@ -3,7 +3,7 @@ from django.db import models
 from ipaddress import IPv4Address
 
 class NodeManager(models.Manager):
-    def create_Node(self, parser, public_IP):
+    def create_Node(self, parser, public_IP, network_obj):
 
         if not parser.hostname:
             parser.hostname = self.random_name()
@@ -16,13 +16,13 @@ class NodeManager(models.Manager):
             IP = str(IPv4Address(ip_list[0].private_IP) + 1)
 
         if Node.objects.filter(public_IP=public_IP).exists():
-            nodes = Node.objects.filter(public_IP=public_IP)
-            node = nodes[0]
+            nodes = Node.objects.get(public_IP=public_IP)
+            node.network = network_obj
             node.hostname = parser.hostname
             node.pub_key = parser.rsa
             node.config_IP = parser.config_ip
         else:
-            node = self.create(hostname=parser.hostname, public_IP=public_IP, config_IP=parser.config_ip, pub_key=parser.rsa)
+            node = self.create(hostname=parser.hostname, public_IP=public_IP, config_IP=parser.config_ip, pub_key=parser.rsa, network=network_obj)
         if IP:
             node.private_IP = IP
 
