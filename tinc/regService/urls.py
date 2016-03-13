@@ -1,8 +1,8 @@
 from django.conf.urls import url
 
-from .views import *
+from .views import views
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^config', ConfigView.as_view(), name='config'),
+    url(r'^config', views.ConfigView.as_view(), name='config'),
 ]
