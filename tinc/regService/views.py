@@ -27,7 +27,7 @@ class ConfigView(View):
     
     def get(self, request, *args, **kwargs):
         node_list = Node.objects.all()
-        p = Parser()network_obj
+        p = Parser()
         response=[]
         for node in node_list:
             p.parseNode(node)
