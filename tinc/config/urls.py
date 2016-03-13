@@ -18,5 +18,6 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^regService/', include('regService.urls')),
-    url(r'^admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls, name='admin_site'),
+    url(r'^.*', RedirectView.as_view(pattern_name='admin_site'))
 ]
