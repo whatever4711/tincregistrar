@@ -16,7 +16,7 @@ class NodeManager(models.Manager):
             IP = str(IPv4Address(ip_list[0].private_IP) + 1)
 
         if Node.objects.filter(public_IP=public_IP).exists():
-            nodes = Node.objects.get(public_IP=public_IP)
+            node = Node.objects.get(public_IP=public_IP)
             node.network = network_obj
             node.hostname = parser.hostname
             node.pub_key = parser.rsa
