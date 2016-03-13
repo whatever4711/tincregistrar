@@ -10,6 +10,7 @@ class NodeParser:
 
     def __init__(self):
         self.hostname = ""
+        self.networkname = ""
         self.rsa = ""
         self.config_ip = ""
         self.subnet = ""
