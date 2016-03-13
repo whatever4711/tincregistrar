@@ -7,6 +7,7 @@ from .models import Node
 from .models import Network
 from .logic import NodeParser as Parser
 from django.views.generic import View
+import uuid
 
 #from django.views.decorators.csrf import csrf_protect
 #import simplejson
