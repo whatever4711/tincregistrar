@@ -99,5 +99,5 @@ man/man5
 man/man8
 pyenv
 vendor/pkg/
-# SQLITE Database
-mydatabase
+# SQLITE Database Folder
+data/
