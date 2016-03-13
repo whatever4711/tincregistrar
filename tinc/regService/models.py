@@ -44,6 +44,13 @@ class NodeManager(models.Manager):
         else:
             return random_name
 
+class Network(models.Model):
+    netname = models.CharField('netname', default='tinc', max_length=100)
+    net = models.GenericIPAddressField('net', default="10.0.0.0")
+    netmask = models.PositiveSmallIntegerField('subnet', default=32)
+    secret = models.CharField('secret', max_length=32)
+
+
 # Create your models here.
 class Node(models.Model):
     network = models.ForeignKey(Network)
@@ -58,9 +65,3 @@ class Node(models.Model):
 
     def __str__(self):
         return '%s PubIP: %s' % (self.hostname, self.public_IP)
-
-class Network(models.Model):
-    netname = models.CharField('netname', default='tinc', max_length=100)
-    net = models.GenericIPAddressField('net', default="10.0.0.0")
-    netmask = models.PositiveSmallIntegerField('subnet', default=32)
-    secret = models.CharField('secret', max_length=32)
