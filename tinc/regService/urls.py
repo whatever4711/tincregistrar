@@ -5,5 +5,5 @@ from .views import ConfigView
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
-    url(r'^config', ConfigView.as_view(), name='config'),
+    url(r'^config', views.ConfigView.as_view(), name='config'),
 ]

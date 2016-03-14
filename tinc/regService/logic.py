@@ -2,6 +2,7 @@ from .models import Node
 
 class NodeParser:
     hostnameComment = "# Hostname = "
+    networknameComment = "# NetworkName = "
     beginRSA = "-----BEGIN RSA PUBLIC KEY-----"
     endRSA = "-----END RSA PUBLIC KEY-----"
     addressName = "Address = "
@@ -9,6 +10,7 @@ class NodeParser:
 
     def __init__(self):
         self.hostname = ""
+        self.networkname = ""
         self.rsa = ""
         self.config_ip = ""
         self.subnet = ""
@@ -19,6 +21,8 @@ class NodeParser:
         for address in addresses:
             if address.startswith(self.hostnameComment):
                 self.hostname = address.replace(self.hostnameComment, '')
+            if address.startswith(self.networknameComment):
+                self.networkname = address.replace(self.networknameComment, '')
             if address.startswith(self.addressName):
                 self.config_ip = address.replace(self.addressName, '')
             if address.startswith(self.subnetName):
@@ -27,6 +31,7 @@ class NodeParser:
 
     def parseNode(self, Node):
         self.hostname = Node.hostname
+        self.network = Node.network.netname
         self.rsa = Node.pub_key
         self.config_ip = Node.config_IP
         self.subnet = ''.join([Node.private_IP, '/', str(Node.private_SN)])
@@ -41,19 +46,10 @@ class NodeParser:
 
     def __str__(self):
         sos = []
-        sos.append(self.hostnameComment)
-        sos.append(self.hostname)
-        sos.append('\n')
-        sos.append(self.addressName)
-        sos.append(self.config_ip)
-        sos.append('\n')
-        sos.append(self.subnetName)
-        sos.append(self.subnet)
-        sos.append('\n\n')
-        sos.append(self.beginRSA)
-        sos.append('\n')
-        sos.append(self.splitRSA(64))
-        sos.append('\n')
-        sos.append(self.endRSA)
-        sos.append('\n')
+        sos.append('%s %s \n' % (self.hostnameComment, self.hostname))
+        sos.append('%s %s \n' % (self.addressName, self.config_ip))
+        sos.append('%s %s \n\n' % (self.subnetName, self.subnet))
+        sos.append('%s \n' % self.beginRSA)
+        sos.append('%s \n' % self.splitRSA(64))
+        sos.append('%s \n' % self.endRSA)
         return ''.join(sos)

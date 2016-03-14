@@ -24,13 +24,13 @@ docker exec tincregistrator_web_1 /bin/bash -c "echo \"from django.contrib.auth.
 # For Postgresql
 docker run -it -v $PWD:/usr/src/app  -p 8000:8000 --link tincregistrator_db_1:db --net="tincregistrator_default" tincregistrator_web /bin/bash
 # For Sqlite
-docker run -it -v $PWD:/usr/src/app -v tincregistrator_sqllitedb:/usr/src/app/tinc/data -p 8000:8000 --net="tincregistrator_default" tincregistrator_web /bin/bash
+docker run -it -v $PWD:/usr/src/app -v tincregistrator_sqlitedb:/usr/src/app/tinc/data -p 8000:8000 --net="tincregistrator_default" tincregistrator_web /bin/bash
 ```
 
 Usage within curl:
-- Upload your tinc configuration with ```curl -X POST -T $YOURTINCCONFIG serverIP:8000/regService/config```
-- Get configuration of other clients with ```curl serverIP:8000/regService/config```
-- Delete your tinc configuration with ```curl -X DELETE serverIP:8000/regService/config```
+- Upload your tinc configuration with ```curl -H $AUTH_TOKEN -X POST -T $YOURTINCCONFIG serverIP:8000/regService/config```
+- Get configuration of other clients with ```curl -H $AUTH_TOKEN serverIP:8000/regService/config```
+- Delete your tinc configuration with ```curl -H $AUTH_TOKEN -X DELETE serverIP:8000/regService/config```
 
 ## Client
 ### Just install tinc with:

@@ -4,8 +4,10 @@ from django.shortcuts import render
 from django.http import HttpResponse, Http404
 from django.template import loader
 from .models import Node
+from .models import Network
 from .logic import NodeParser as Parser
 from django.views.generic import View
+import uuid
 
 #from django.views.decorators.csrf import csrf_protect
 #import simplejson
@@ -18,11 +20,24 @@ def index(request):
     }
     return HttpResponse(template.render(context, request))
 
+def check_secret(request):
+    auth_field = 'HTTP_AUTHORIZATION'
+    ip = request.META['REMOTE_ADDR']
+    if auth_field not in request.META:
+        raise Http404("IP %s is not authorized to access this service" % ip)
+    secret_uncleaned = request.META[auth_field]
+    secret_split = secret_uncleaned.split(" ")
+    if len(secret_split) <= 1:
+        return uuid.uuid1()
+    else:
+        return secret_split[1]
+
 #@csrf_protect
 
 class ConfigView(View):
-    
+
     def get(self, request, *args, **kwargs):
+        check_secret(request)
         node_list = Node.objects.all()
         p = Parser()
         response=[]
@@ -33,20 +48,30 @@ class ConfigView(View):
         return HttpResponse(''.join(response))
 
     def post(self, request, *args, **kwargs):
+        secret = check_secret(request)
         s = request.body.decode("utf-8")
         p = Parser()
         p.parseInput(s)
 
         ip = request.META['REMOTE_ADDR']
-        node = Node.objects.create_Node(p, ip)
+
+        obj, created = Network.objects.get_or_create(secret=secret)
+        obj.netname = p.networkname
+        obj.save()
+        node = Node.objects.create_Node(p, ip, obj)
+
         p.parseNode(node)
         response=[]
         if p.config_ip is not ip:
             response.append("# Your external IP is: %s\n" % ip)
+
+        response.append("# NetworkName: {}\n".format(p.networkname))
+
         response.append(str(p))
         return HttpResponse(''.join(response))
 
     def delete(self, request, *args, **kwargs):
+        check_secret(request)
         ip = request.META['REMOTE_ADDR']
         if Node.objects.delete_Node(ip):
             return HttpResponse("DELETED %s" % ip)
