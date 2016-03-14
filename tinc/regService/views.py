@@ -59,10 +59,10 @@ class ConfigView(View):
 
         created = Network.objects.create_Network(p, secret)
         node = Node.objects.create_Node(p, ip, created)
-        
+
         p.parseNode(node)
         response=[]
-        if p.config_ip is not ip:
+        if p.public_ip is not ip:
             response.append("# Your external IP is: %s\n" % ip)
 
         response.append("# NetworkName: {}\n".format(p.networkname))

@@ -1,7 +1,6 @@
-import names
+import names, ipaddress, uuid
 from django.db import models
-from ipaddress import IPv4Address
-import uuid
+from .error import AddressError
 
 def random_name(existingNames):
     newName = names.get_first_name().lower()
@@ -14,17 +13,21 @@ class NodeManager(models.Manager):
     def create_Node(self, parser, public_IP, network):
 
         if not parser.hostname:
-            parser.hostname = random_name(map(lambda x: x.hostname, Node.objects.all()))
-        if not parser.config_ip:
-            parser.config_ip = public_IP
+            parser.hostname = random_name(map(lambda x: x.hostname,
+                Node.objects.all()))
+        if not parser.public_ip:
+            parser.public_ip = public_IP
 
-        ip_list = Node.objects.order_by('-private_IP').filter(network=network)
+        available = list(filter(lambda a: a not in map(lambda x: x.private_IP,
+            Node.objects.order_by('-private_IP').filter(network = network)),
+            network.getNetwork().hosts()))
 
         IP=""
-        if ip_list:
-            IP = str(IPv4Address(ip_list[0].private_IP) + 1)
+        if available:
+            IP = str(ipaddress.ip_address(available[0] + 1))
         else:
-            IP = str(IPv4Address(network.net) + 1)
+            raise AddressError("NO FREE IPs", "Subnet %s completely allocated"
+                % network.getNetwork())
 
         if Node.objects.filter(public_IP=public_IP).exists():
             node = Node.objects.get(public_IP=public_IP)
@@ -32,10 +35,10 @@ class NodeManager(models.Manager):
             node.hostname = parser.hostname
             node.pub_key = parser.rsa
             node.private_IP = IP
-            node.config_IP = parser.config_ip
+            node.config_IP = parser.public_ip
         else:
-            node = self.create(network=network_obj, hostname=parser.hostname,
-                public_IP=public_IP, private_IP=IP, config_IP=parser.config_ip,
+            node = self.create(network=network, hostname=parser.hostname,
+                public_IP=public_IP, private_IP=IP, config_IP=parser.public_ip,
                 pub_key=parser.rsa)
 
         node.save()
@@ -48,21 +51,22 @@ class NodeManager(models.Manager):
         else:
             return False
 
-
-
 class NetworkManager(models.Manager):
     def create_Network(self, parser, secret):
         if not parser.networkname:
-            parser.networkname = random_name(map(lambda x: x.netname, Network.objects.all()))
+            parser.networkname = random_name(map(lambda x: x.netname,
+                Network.objects.all()))
 
+        #TODO: Check if Net is the same
         if Network.objects.filter(secret=secret).exists():
             network = Network.objects.get(secret=secret)
         else:
             network = self.create(netname=parser.networkname, secret=secret)
-        #if parser.subnet:
-        #    network.net = parser.net
+
         if parser.subnet:
-            network.netmask = parser.subnet
+            base_net = ipaddress.ip_network(parser.subnet, strict=False)
+            network.net = str(base_net.network_address)
+            network.netmask = base_net.prefixlen
 
         network.save()
         return network
@@ -71,24 +75,23 @@ class NetworkManager(models.Manager):
 class Network(models.Model):
     netname = models.CharField('netname', default='tinc', max_length=100)
     net = models.GenericIPAddressField('net', default="10.0.0.0")
-    netmask = models.PositiveSmallIntegerField('subnet', default=32)
+    netmask = models.PositiveSmallIntegerField('netmask', default=32)
     secret = models.CharField('secret', max_length=32)
 
     objects = NetworkManager()
 
+    def getNetwork(self):
+        return ipaddress.ip_network("%s/%s" % (self.net, self.netmask))
+
     def __str__(self):
         return self.netname
 
-
-# Create your models here.
 class Node(models.Model):
     network = models.ForeignKey(Network)
     hostname = models.CharField('hostname', default='', max_length=100)
     public_IP = models.GenericIPAddressField('public IP')
     config_IP = models.GenericIPAddressField('config IP')
-
-    # TODO get from network
-    private_IP = models.GenericIPAddressField('private IP', default='10.0.0.1')
+    private_IP = models.GenericIPAddressField('private IP')
     pub_key = models.TextField('pub Key')
 
     objects = NodeManager()

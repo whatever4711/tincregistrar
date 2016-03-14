@@ -12,7 +12,7 @@ class NodeParser:
         self.hostname = ""
         self.networkname = ""
         self.rsa = ""
-        self.config_ip = ""
+        self.public_ip = ""
         self.subnet = ""
 
     def parseInput(self, txt):
@@ -24,7 +24,7 @@ class NodeParser:
             if address.startswith(self.networknameComment):
                 self.networkname = address.replace(self.networknameComment, '')
             if address.startswith(self.addressName):
-                self.config_ip = address.replace(self.addressName, '')
+                self.public_ip = address.replace(self.addressName, '')
             if address.startswith(self.subnetName):
                 self.subnet = address.replace(self.subnetName, '')
         self.rsa = spl[1].split(self.endRSA)[0].replace('\n', '')
@@ -33,8 +33,8 @@ class NodeParser:
         self.hostname = Node.hostname
         self.network = Node.network.netname
         self.rsa = Node.pub_key
-        self.config_ip = Node.config_IP
-        self.subnet = ''.join([Node.private_IP, '/', str(Node.network.netmask)])
+        self.public_ip = Node.config_IP
+        self.subnet = Node.private_IP
 
     def splitRSA(self,n):
         s = self.rsa
@@ -47,7 +47,7 @@ class NodeParser:
     def __str__(self):
         sos = []
         sos.append('%s %s \n' % (self.hostnameComment, self.hostname))
-        sos.append('%s %s \n' % (self.addressName, self.config_ip))
+        sos.append('%s %s \n' % (self.addressName, self.public_ip))
         sos.append('%s %s \n\n' % (self.subnetName, self.subnet))
         sos.append('%s \n' % self.beginRSA)
         sos.append('%s \n' % self.splitRSA(64))
