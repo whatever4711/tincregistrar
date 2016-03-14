@@ -65,8 +65,6 @@ class ConfigView(View):
         if p.public_ip is not ip:
             response.append("# Your external IP is: %s\n" % ip)
 
-        response.append("# NetworkName: {}\n".format(p.networkname))
-
         response.append(str(p))
         return HttpResponse(''.join(response))
 

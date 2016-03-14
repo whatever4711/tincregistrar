@@ -3,14 +3,17 @@ from .models import Node
 class NodeParser:
     hostnameComment = "# Hostname = "
     networknameComment = "# NetworkName = "
+    netComment = "# Network = "
     beginRSA = "-----BEGIN RSA PUBLIC KEY-----"
     endRSA = "-----END RSA PUBLIC KEY-----"
     addressName = "Address = "
+    # Subnet on each tinc node
     subnetName = "Subnet = "
 
     def __init__(self):
         self.hostname = ""
         self.networkname = ""
+        self.net = ""
         self.rsa = ""
         self.public_ip = ""
         self.subnet = ""
@@ -23,6 +26,8 @@ class NodeParser:
                 self.hostname = address.replace(self.hostnameComment, '')
             if address.startswith(self.networknameComment):
                 self.networkname = address.replace(self.networknameComment, '')
+            if address.startswith(self.netComment):
+                self.net = address.replace(self.netComment, '')
             if address.startswith(self.addressName):
                 self.public_ip = address.replace(self.addressName, '')
             if address.startswith(self.subnetName):
@@ -32,9 +37,10 @@ class NodeParser:
     def parseNode(self, Node):
         self.hostname = Node.hostname
         self.network = Node.network.netname
+        self.net = Node.network.getNetwork()
         self.rsa = Node.pub_key
         self.public_ip = Node.config_IP
-        self.subnet = Node.private_IP
+        self.subnet = Node.getSubnet()
 
     def splitRSA(self,n):
         s = self.rsa
@@ -46,6 +52,8 @@ class NodeParser:
 
     def __str__(self):
         sos = []
+        sos.append('%s %s \n' % (self.networknameComment, self.networkname))
+        sos.append('%s %s \n' % (self.netComment, self.net))
         sos.append('%s %s \n' % (self.hostnameComment, self.hostname))
         sos.append('%s %s \n' % (self.addressName, self.public_ip))
         sos.append('%s %s \n\n' % (self.subnetName, self.subnet))
