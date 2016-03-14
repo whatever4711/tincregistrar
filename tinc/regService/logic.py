@@ -34,7 +34,7 @@ class NodeParser:
         self.network = Node.network.netname
         self.rsa = Node.pub_key
         self.config_ip = Node.config_IP
-        self.subnet = ''.join([Node.private_IP, '/', str(Node.private_SN)])
+        self.subnet = ''.join([Node.private_IP, '/', str(Node.network.netmask)])
 
     def splitRSA(self,n):
         s = self.rsa

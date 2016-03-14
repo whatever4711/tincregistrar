@@ -26,11 +26,13 @@ def check_secret(request):
     if auth_field not in request.META:
         raise Http404("IP %s is not authorized to access this service" % ip)
     secret_uncleaned = request.META[auth_field]
-    secret_split = secret_uncleaned.split(" ")
-    if len(secret_split) <= 1:
-        return uuid.uuid1()
-    else:
-        return secret_split[1]
+    return secret_uncleaned
+    # TODO UUID as secret
+    #secret_split = secret_uncleaned.split(" ")
+    #if len(secret_split) <= 1:
+    #    return uuid.uuid1()
+    #else:
+    #    return secret_split[1]
 
 #@csrf_protect
 
@@ -55,11 +57,9 @@ class ConfigView(View):
 
         ip = request.META['REMOTE_ADDR']
 
-        obj, created = Network.objects.get_or_create(secret=secret)
-        obj.netname = p.networkname
-        obj.save()
-        node = Node.objects.create_Node(p, ip, obj)
-
+        created = Network.objects.create_Network(p, secret)
+        node = Node.objects.create_Node(p, ip, created)
+        
         p.parseNode(node)
         response=[]
         if p.config_ip is not ip:
