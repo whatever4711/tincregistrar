@@ -10,6 +10,8 @@ TINC_NETWORKNAME="demo"
 TINC_KEYLENGTH="4096"
 TINC_INTERFACE="tun0"
 
+AUTH_TOKEN="1234"
+
 #######################
 # generated parameter #
 #######################
@@ -54,7 +56,7 @@ function disable_autostart(){
 }
 
 function delete_config(){
-  local response="$(curl --silent -X DELETE "${CONFIG_SERVER}/regService/config")"
+  local response="$(curl --silent -H "Authorization: ${AUTH_TOKEN}" -X DELETE "${CONFIG_SERVER}/regService/config")"
   if [[ "${response}" == "DELETED" ]]; then
     echo "${response}"
   else
@@ -64,12 +66,12 @@ function delete_config(){
 
 function post_config(){
   #send own config
-  temp=$(curl --silent -X POST -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config")
+  temp=$(curl --silent -H "Authorization: ${AUTH_TOKEN}" -X POST -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config")
   echo -e "$temp" > "${NODE_HOST_FILES}/${HOSTNAME}"
 }
 
 function get_configs(){
-  local ALL_CONFIGS="$(curl --silent "${CONFIG_SERVER}/regService/config")"
+  local ALL_CONFIGS="$(curl --silent -H "Authorization: ${AUTH_TOKEN}" "${CONFIG_SERVER}/regService/config")"
 
   sed -i -e '/ConnectTo.*/d' "${NODE_CONFIG_FILE}"
   rm -rf "${NODE_HOST_FILES}/*"
