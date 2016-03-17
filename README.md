@@ -28,9 +28,9 @@ docker run -it -v $PWD:/usr/src/app -v tincregistrator_sqlitedb:/usr/src/app/tin
 ```
 
 Usage within curl:
-- Upload your tinc configuration with ```curl -H $AUTH_TOKEN -X POST -T $YOURTINCCONFIG serverIP:8000/regService/config```
-- Get configuration of other clients with ```curl -H $AUTH_TOKEN serverIP:8000/regService/config```
-- Delete your tinc configuration with ```curl -H $AUTH_TOKEN -X DELETE serverIP:8000/regService/config```
+- Upload your tinc configuration with ```curl -H "Authorization: $AUTH_TOKEN" -X POST -T $YOURTINCCONFIG serverIP:8000/regService/config```
+- Get configuration of other clients with ```curl -H Authorization: $AUTH_TOKEN" serverIP:8000/regService/config```
+- Delete your tinc configuration with ```curl -H Authorization: $AUTH_TOKEN" -X DELETE serverIP:8000/regService/config```
 
 ## Client
 ### Just install tinc with:
