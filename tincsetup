@@ -57,7 +57,7 @@ function disable_autostart(){
 }
 
 function delete_config(){
-  local response="$(curl --silent -H "Authorization: ${AUTH_TOKEN}" -X DELETE "${CONFIG_SERVER}/regService/config")"
+  local response="$(curl --silent -H "HTTP_AUTHORIZATION: ${AUTH_TOKEN}" -X DELETE "${CONFIG_SERVER}/regService/config")"
   if [[ "${response}" == "DELETED"* ]]; then
     echo "${response}"
   else
@@ -67,13 +67,13 @@ function delete_config(){
 
 function post_config(){
   #send own config
-  temp=$(curl --silent -H "Authorization: ${AUTH_TOKEN}" -X POST -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config")
+  temp=$(curl --silent -H "HTTP_AUTHORIZATION: ${AUTH_TOKEN}" -X POST -T "${NODE_HOST_FILES}/${HOSTNAME}" "${CONFIG_SERVER}/regService/config")
   echo -e "$temp" > "${NODE_HOST_FILES}/${HOSTNAME}"
 }
 
 function get_configs(){
 
-  local cmd="curl --silent -H \"Authorization: ${AUTH_TOKEN}\" -X GET \"${CONFIG_SERVER}/regService/config\""
+  local cmd="curl --silent -H \"HTTP_AUTHORIZATION: ${AUTH_TOKEN}\" -X GET \"${CONFIG_SERVER}/regService/config\""
   local ALL_CONFIGS="$(eval "${cmd}")"
   echo "${cmd}"
 
