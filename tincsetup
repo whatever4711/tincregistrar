@@ -52,7 +52,7 @@ function enable_autostart(){
 
 function disable_autostart(){
   if [[ $(grep -c "${TINC_NETWORKNAME}" "${TINC_PATH}/nets.boot") -gt 0 ]]; then
-    sed -i "s/${TINC_NETWORKNAME}\n//g" "${TINC_PATH}/nets.boot"
+    sed -i -e "s/${TINC_NETWORKNAME}\n//g" "${TINC_PATH}/nets.boot"
   fi
 }
 
@@ -164,10 +164,10 @@ function create(){
 
 function remove(){
   stop
-  echo "remove network ${TINC_NETWORKNAME}"
-  rm -rf "${TINC_PATH}/${TINC_NETWORKNAME}"
   echo "delete config from tincregistrator"
   delete_config
+  echo "remove network ${TINC_NETWORKNAME}"
+  rm -rf "${TINC_PATH}/${TINC_NETWORKNAME}"
 }
 
 function start(){
