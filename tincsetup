@@ -73,7 +73,7 @@ function post_config(){
 
 function get_configs(){
 
-  local cmd="curl --silent -H \"Authorization: ${AUTH_TOKEN}\" \"${CONFIG_SERVER}/regService/config\""
+  local cmd="curl --silent -H \"Authorization: ${AUTH_TOKEN}\" -X GET \"${CONFIG_SERVER}/regService/config\""
   local ALL_CONFIGS="$(eval "${cmd}")"
   echo "${cmd}"
 
