@@ -16,7 +16,7 @@ AUTH_TOKEN="1234"
 #######################
 # generated parameter #
 #######################
-HOSTNAME=${HOSTNAME//[\-\_\.\s]/}
+HOSTNAME=${HOSTNAME//[\-\_\.]/}
 TINC_PATH="/etc/tinc"
 NODE_HOST_FILES="${TINC_PATH}/${TINC_NETWORKNAME}/hosts"
 NODE_CONFIG_FILE="${TINC_PATH}/${TINC_NETWORKNAME}/tinc.conf"
