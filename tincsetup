@@ -78,7 +78,7 @@ function get_configs(){
   sed -i -e '/ConnectTo.*/d' "${NODE_CONFIG_FILE}"
   rm -rf "${NODE_HOST_FILES}/*"
 
-  local regex="#\sHostname\s=\s([A-Za-z0-9]*)"
+  local regex="#\sHostname\s*=\s*([A-Za-z0-9]*)"
   local OLD_IFS="$IFS"
   IFS="%"
   local CONFIG_ARRAY=( $ALL_CONFIGS )
@@ -135,7 +135,7 @@ AddressFamily = ipv4
 Interface = ${TINC_INTERFACE}
 EOM
 
-if [[ -z "${INTERFACE}" ]]; then
+if [[ -n "${INTERFACE}" ]]; then
   IP="$(get_ip_of_interface ${INTERFACE})"
   echo -e "# Hostname = ${HOSTNAME}\n# NetworkName = ${TINC_NETWORKNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
 else
