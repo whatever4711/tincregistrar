@@ -161,7 +161,7 @@ function create(){
   echo "post config to tincregistrator"
   post_config
   echo "get all configs"
-  timeout ${POLL_TIMEOUT} cat <( poll_configs )
+#  timeout ${POLL_TIMEOUT} cat <( poll_configs )
 }
 
 function remove(){
