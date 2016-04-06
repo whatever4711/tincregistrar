@@ -46,7 +46,7 @@ class ConfigView(View):
         for node in node_list:
             p.parseNode(node)
             response.append(str(p))
-            response.append('%')
+            response.append('%\n')
         return HttpResponse(''.join(response))
 
     def post(self, request, *args, **kwargs):

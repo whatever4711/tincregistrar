@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 
 CONFIG_SERVER=${CONFIG_SERVER:-"192.168.178.55:8000"}
+AUTH_TOKEN=${AUTH_TOKEN:-"changeme"}
+TINC_NETWORKNAME=${TINC_NETWORKNAME:-"demo"}
 
 EXPECTED_NODES=2
 POLL_TIMEOUT=300
-#INTERFACE="eth0"
+INTERFACE="eth0"
 
-TINC_NETWORKNAME="demo"
 TINC_KEYLENGTH="4096"
 TINC_INTERFACE="tun0"
 
@@ -15,7 +16,7 @@ AUTH_TOKEN="1234"
 #######################
 # generated parameter #
 #######################
-HOSTNAME=${HOSTNAME//[\-\_\.\s]/}
+HOSTNAME=${HOSTNAME//[\-\_\.]/}
 TINC_PATH="/etc/tinc"
 NODE_HOST_FILES="${TINC_PATH}/${TINC_NETWORKNAME}/hosts"
 NODE_CONFIG_FILE="${TINC_PATH}/${TINC_NETWORKNAME}/tinc.conf"
@@ -51,13 +52,13 @@ function enable_autostart(){
 
 function disable_autostart(){
   if [[ $(grep -c "${TINC_NETWORKNAME}" "${TINC_PATH}/nets.boot") -gt 0 ]]; then
-    sed -i "s/${TINC_NETWORKNAME}\n//g" "${TINC_PATH}/nets.boot"
+    sed -i -e "s/${TINC_NETWORKNAME}\n//g" "${TINC_PATH}/nets.boot"
   fi
 }
 
 function delete_config(){
   local response="$(curl --silent -H "Authorization: ${AUTH_TOKEN}" -X DELETE "${CONFIG_SERVER}/regService/config")"
-  if [[ "${response}" == "DELETED" ]]; then
+  if [[ "${response}" == "DELETED"* ]]; then
     echo "${response}"
   else
     echo "Something went wrong"
@@ -71,12 +72,15 @@ function post_config(){
 }
 
 function get_configs(){
-  local ALL_CONFIGS="$(curl --silent -H "Authorization: ${AUTH_TOKEN}" "${CONFIG_SERVER}/regService/config")"
+
+  local cmd="curl --silent -H \"Authorization: ${AUTH_TOKEN}\" -X GET \"${CONFIG_SERVER}/regService/config\""
+  local ALL_CONFIGS="$(eval "${cmd}")"
+  echo "${cmd}"
 
   sed -i -e '/ConnectTo.*/d' "${NODE_CONFIG_FILE}"
   rm -rf "${NODE_HOST_FILES}/*"
 
-  local regex="#\sHostname\s=\s([A-Za-z0-9]*)"
+  local regex="#\sHostname\s*=\s*([A-Za-z0-9]*)"
   local OLD_IFS="$IFS"
   IFS="%"
   local CONFIG_ARRAY=( $ALL_CONFIGS )
@@ -86,7 +90,9 @@ function get_configs(){
     local NODE_NAME=${BASH_REMATCH[1]}
 
     if [[ ! -f "${NODE_HOST_FILES}/$NODE_NAME" ]]; then
-      echo $ONE_CONFIG > "${NODE_HOST_FILES}/$NODE_NAME"
+      echo $ONE_CONFIG > "${NODE_HOST_FILES}/${NODE_NAME}"
+    else
+      echo $ONE_CONFIG > "${NODE_HOST_FILES}/${NODE_NAME}2"
     fi
 
     if [[ "$HOSTNAME" != "$NODE_NAME" ]]; then
@@ -114,8 +120,6 @@ mkdir -p "${NODE_HOST_FILES}/"
 cat << EOM > "${TINC_PATH}/${TINC_NETWORKNAME}/tinc-up"
 #!/bin/sh
 
-
-
 IP="\$(grep Subnet "/etc/tinc/\${NETNAME}/hosts/\${NAME}" |cut -d' ' -f3 | cut -d'/' -f1)"
 ifconfig "\${INTERFACE}" "\${IP}" netmask 255.255.255.0
 EOM
@@ -133,11 +137,11 @@ AddressFamily = ipv4
 Interface = ${TINC_INTERFACE}
 EOM
 
-if [[ -z "${INTERFACE}" ]]; then
+if [[ -n "${INTERFACE}" ]]; then
   IP="$(get_ip_of_interface ${INTERFACE})"
-  echo -e "# Hostname = ${HOSTNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+  echo -e "# Hostname = ${HOSTNAME}\n# NetworkName = ${TINC_NETWORKNAME}\nAddress = ${IP}" > "${NODE_HOST_FILES}/${HOSTNAME}"
 else
-  echo -e "# Hostname = ${HOSTNAME}" > "${NODE_HOST_FILES}/${HOSTNAME}"
+  echo -e "# Hostname = ${HOSTNAME}\n# NetworkName = ${TINC_NETWORKNAME}" > "${NODE_HOST_FILES}/${HOSTNAME}"
 fi
 tincd -n ${TINC_NETWORKNAME} -K${TINC_KEYLENGTH}
 }
@@ -157,27 +161,25 @@ function create(){
   echo "post config to tincregistrator"
   post_config
   echo "get all configs"
-  timeout ${POLL_TIMEOUT} cat <( poll_configs )
+#  timeout ${POLL_TIMEOUT} cat <( poll_configs )
 }
 
 function remove(){
   stop
-  echo "remove network ${TINC_NETWORKNAME}"
-  rm -rf "${TINC_PATH}/${TINC_NETWORKNAME}"
   echo "delete config from tincregistrator"
   delete_config
+  echo "remove network ${TINC_NETWORKNAME}"
+  rm -rf "${TINC_PATH}/${TINC_NETWORKNAME}"
 }
 
 function start(){
   echo "enable"
   enable_autostart
-#  systemctl start tinc.service
-  service tinc start
+  systemctl start tinc.service
 }
 
 function stop(){
-#  systemctl stop tinc.service
-  service tinc stop
+  systemctl stop tinc.service
   echo "disable"
   disable_autostart
 }

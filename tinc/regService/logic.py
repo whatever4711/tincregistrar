@@ -52,12 +52,12 @@ class NodeParser:
 
     def __str__(self):
         sos = []
-        sos.append('%s %s \n' % (self.networknameComment, self.networkname))
-        sos.append('%s %s \n' % (self.netComment, self.net))
-        sos.append('%s %s \n' % (self.hostnameComment, self.hostname))
-        sos.append('%s %s \n' % (self.addressName, self.public_ip))
-        sos.append('%s %s \n\n' % (self.subnetName, self.subnet))
-        sos.append('%s \n' % self.beginRSA)
-        sos.append('%s \n' % self.splitRSA(64))
-        sos.append('%s \n' % self.endRSA)
+        sos.append('%s%s\n' % (self.networknameComment, self.networkname))
+        sos.append('%s%s\n' % (self.netComment, self.net))
+        sos.append('%s%s\n' % (self.hostnameComment, self.hostname))
+        sos.append('%s%s\n' % (self.addressName, self.public_ip))
+        sos.append('%s%s\n\n' % (self.subnetName, self.subnet))
+        sos.append('%s\n' % self.beginRSA)
+        sos.append('%s\n' % self.splitRSA(64))
+        sos.append('%s\n' % self.endRSA)
         return ''.join(sos)
