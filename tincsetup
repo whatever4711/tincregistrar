@@ -11,8 +11,6 @@ INTERFACE="eth0"
 TINC_KEYLENGTH="4096"
 TINC_INTERFACE="tun0"
 
-AUTH_TOKEN="1234"
-
 #######################
 # generated parameter #
 #######################
@@ -89,11 +87,7 @@ function get_configs(){
     [[ "$ONE_CONFIG" =~ ${regex} ]]
     local NODE_NAME=${BASH_REMATCH[1]}
 
-    if [[ ! -f "${NODE_HOST_FILES}/$NODE_NAME" ]]; then
-      echo $ONE_CONFIG > "${NODE_HOST_FILES}/${NODE_NAME}"
-    else
-      echo $ONE_CONFIG > "${NODE_HOST_FILES}/${NODE_NAME}2"
-    fi
+    echo $ONE_CONFIG > "${NODE_HOST_FILES}/${NODE_NAME}"
 
     if [[ "$HOSTNAME" != "$NODE_NAME" ]]; then
       if [[ ($(grep -c "ConnectTo = $NODE_NAME" "${NODE_CONFIG_FILE}") -eq 0) ]]; then
