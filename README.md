@@ -1,4 +1,4 @@
-# tincregistrator
+# tincregistrar
 
 
 ## Build up Django application
@@ -13,18 +13,18 @@ docker-compose run web python manage.py startapp test
 #!/bin/bash
 docker-compose up -d
 sleep 5
-docker exec tincregistrator_web_1 python manage.py makemigrations
-docker exec tincregistrator_web_1 python manage.py migrate
+docker exec tincregistrar_web_1 python manage.py makemigrations
+docker exec tincregistrar_web_1 python manage.py migrate
 docker-compose restart web
-docker exec tincregistrator_web_1 /bin/bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell"
+docker exec tincregistrar_web_1 /bin/bash -c "echo \"from django.contrib.auth.models import User; User.objects.create_superuser('admin', 'admin@example.com', 'admin')\" | python manage.py shell"
 ```
 
 ### Debugging
 ```
 # For Postgresql
-docker run -it -v $PWD:/usr/src/app  -p 8000:8000 --link tincregistrator_db_1:db --net="tincregistrator_default" tincregistrator_web /bin/bash
+docker run -it -v $PWD:/usr/src/app  -p 8000:8000 --link tincregistrar_db_1:db --net="tincregistrar_default" tincregistrar_web /bin/bash
 # For Sqlite
-docker run -it -v $PWD:/usr/src/app -v tincregistrator_sqlitedb:/usr/src/app/tinc/data -p 8000:8000 --net="tincregistrator_default" tincregistrator_web /bin/bash
+docker run -it -v $PWD:/usr/src/app -v tincregistrar_sqlitedb:/usr/src/app/tinc/data -p 8000:8000 --net="tincregistrar_default" tincregistrar_web /bin/bash
 ```
 
 Usage within curl:
