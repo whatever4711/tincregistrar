@@ -17,7 +17,7 @@ from django.conf.urls import include, url
 from django.contrib import admin
 from django.views.generic.base import RedirectView
 
-admin.site.site_header = 'tinc Registrator'
+admin.site.site_header = 'Tinc Registrar'
 
 urlpatterns = [
     url(r'^regService/', include('regService.urls')),
