@@ -40,7 +40,7 @@ class NodeManager(models.Manager):
             node.config_IP = parser.public_ip
         else:
             node = self.create(network=network, hostname=parser.hostname,
-                public_IP=public_IP, private_IP=IP, config_IP=parser.public_ip,
+                public_IP=parser.public_ip, private_IP=IP, config_IP=parser.public_ip,
                 pub_key=parser.rsa)
 
         node.save()

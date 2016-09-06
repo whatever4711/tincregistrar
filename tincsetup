@@ -152,7 +152,7 @@ function test(){
 function create(){
   echo "configure"
   create_tinc_config
-  echo "post config to tincregistrator"
+  echo "post config to tincregistrar"
   post_config
   echo "get all configs"
 #  timeout ${POLL_TIMEOUT} cat <( poll_configs )
@@ -160,7 +160,7 @@ function create(){
 
 function remove(){
   stop
-  echo "delete config from tincregistrator"
+  echo "delete config from tincregistrar"
   delete_config
   echo "remove network ${TINC_NETWORKNAME}"
   rm -rf "${TINC_PATH}/${TINC_NETWORKNAME}"
@@ -190,7 +190,7 @@ usage:
 
   tincsetup remove          Remove tinc configuration.
 
-  tincsetup pullconfig      Get all configs from tincregistrator.
+  tincsetup pullconfig      Get all configs from tincregistrar.
 
   tincsetup test            Ping all existing nodes.
 

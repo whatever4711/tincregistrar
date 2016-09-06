@@ -1,7 +1,12 @@
 #!/bin/bash
+dir=${PWD##*/}
+service=tincregistrar
+name=${dir}_${service}_1
+
 docker-compose up -d
 sleep 5
-docker exec tincregistrator_web_1 python manage.py makemigrations
-docker exec tincregistrator_web_1 python manage.py migrate
-docker-compose restart web
-docker exec -i -t tincregistrator_web_1 python manage.py createsuperuser --username "admin" --email "admin@example.com"
+echo "Setting up ${name}"
+docker exec ${name} python manage.py makemigrations
+docker exec ${name} python manage.py migrate
+docker-compose restart ${service}
+docker exec -it ${name} python manage.py createsuperuser --username "admin" --email "admin@example.com"
