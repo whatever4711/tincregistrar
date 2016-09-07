@@ -1,7 +1,5 @@
 from django.shortcuts import render
-
-# Create your views here.
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, FileResponse
 from django.template import loader
 from .models import Node
 from .models import Network
@@ -35,6 +33,11 @@ def check_secret(request):
     #    return secret_split[1]
 
 #@csrf_protect
+
+def send_script(request):
+    filename = "tincsetup.sh"
+    response = FileResponse(open(filename, 'rb'))
+    return response
 
 class ConfigView(View):
 
