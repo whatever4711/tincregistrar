@@ -1,4 +1,5 @@
 import names, ipaddress, uuid
+from threading import Lock
 from django.db import models
 from .error import AddressError
 
@@ -10,25 +11,29 @@ def random_name(existingNames):
         return random_name(existingNames)
 
 class NodeManager(models.Manager):
+    _lock = Lock()
+
+    @classmethod
+    def _getPrivateIP(cls, network):
+        with cls._lock:
+            # TODO Adjust for subnets on one host
+            ip_list = Node.objects.order_by('-private_IP').filter(network = network)
+            if not ip_list:
+                return str(network.getNetwork().network_address + 1)
+            elif ipaddress.ip_address(ipaddress.ip_address(ip_list[0].private_IP) + 1) in network.getNetwork():
+                return str(ipaddress.ip_address(ip_list[0].private_IP) + 1)
+            else:
+                raise AddressError("NO FREE IPs", "Subnet %s completely allocated"
+                    % network.getNetwork())
+
     def create_Node(self, parser, public_IP, network):
 
         if not parser.hostname:
             parser.hostname = random_name(map(lambda x: x.hostname,
                 Node.objects.all()))
+
         if not parser.public_ip:
             parser.public_ip = public_IP
-
-        ip_list = Node.objects.order_by('-private_IP').filter(network = network)
-
-        # TODO Adjust for subnets on one host
-        IP=""
-        if not ip_list:
-            IP = str(network.getNetwork().network_address + 1)
-        elif ipaddress.ip_address(ipaddress.ip_address(ip_list[0].private_IP) + 1) in network.getNetwork():
-            IP = str(ipaddress.ip_address(ip_list[0].private_IP) + 1)
-        else:
-            raise AddressError("NO FREE IPs", "Subnet %s completely allocated"
-                % network.getNetwork())
 
         if Node.objects.filter(public_IP=public_IP).exists():
             node = Node.objects.get(public_IP=public_IP)
@@ -36,14 +41,15 @@ class NodeManager(models.Manager):
             node.hostname = parser.hostname
             node.pub_key = parser.rsa
             # TODO Within an update a new IP is set?
-            node.private_IP = IP
+            #node.private_IP = NodeManager._getPrivateIP(network)
             node.config_IP = parser.public_ip
         else:
             node = self.create(network=network, hostname=parser.hostname,
-                public_IP=parser.public_ip, private_IP=IP, config_IP=parser.public_ip,
+                public_IP=parser.public_ip, private_IP=NodeManager._getPrivateIP(network), config_IP=parser.public_ip,
                 pub_key=parser.rsa)
 
         node.save()
+
         return node
 
     def delete_Node(self, public_IP):

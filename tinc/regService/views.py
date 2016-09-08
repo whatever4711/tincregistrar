@@ -1,3 +1,4 @@
+from os import path
 from django.shortcuts import render
 from django.http import HttpResponse, Http404, FileResponse
 from django.template import loader
@@ -36,7 +37,8 @@ def check_secret(request):
 
 def send_script(request):
     filename = "tincsetup.sh"
-    response = FileResponse(open(filename, 'rb'))
+    response = FileResponse(open(filename, 'rb'), content_type='text/plain')
+    response['Content-Length'] = path.getsize(filename)
     return response
 
 class ConfigView(View):
