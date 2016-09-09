@@ -41,6 +41,14 @@ def send_script(request):
     response['Content-Length'] = path.getsize(filename)
     return response
 
+def get_client_ip(request):
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
 class ConfigView(View):
 
     def get(self, request, *args, **kwargs):
@@ -60,7 +68,7 @@ class ConfigView(View):
         p = Parser()
         p.parseInput(s)
 
-        ip = request.META['REMOTE_ADDR']
+        ip = get_client_ip(request)
 
         created = Network.objects.create_Network(p, secret)
         node = Node.objects.create_Node(p, ip, created)
@@ -75,7 +83,7 @@ class ConfigView(View):
 
     def delete(self, request, *args, **kwargs):
         check_secret(request)
-        ip = request.META['REMOTE_ADDR']
+        ip = get_client_ip(request)
         if Node.objects.delete_Node(ip):
             return HttpResponse("DELETED %s" % ip)
         else:

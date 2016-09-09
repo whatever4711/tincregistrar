@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIG_SERVER=${CONFIG_SERVER:-"tinc.ktr.wiai.uni-bamberg.de"}
+CONFIG_SERVER=${CONFIG_SERVER:-"192.168.47.12:8000"}
 AUTH_TOKEN=${AUTH_TOKEN:-"changeme"}
 TINC_NETWORKNAME=${TINC_NETWORKNAME:-"demo"}
 
