@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-CONFIG_SERVER=${CONFIG_SERVER:-"192.168.47.12:8000"}
+CONFIG_SERVER=${CONFIG_SERVER:-"tinc.ktr.wiai.uni-bamberg.de"}
 AUTH_TOKEN=${AUTH_TOKEN:-"changeme"}
 TINC_NETWORKNAME=${TINC_NETWORKNAME:-"demo"}
 
@@ -56,6 +56,7 @@ function disable_autostart(){
 
 function delete_config(){
   local response="$(curl --silent -H "Authorization: ${AUTH_TOKEN}" -X DELETE "${CONFIG_SERVER}/regService/config")"
+  echo "${response}"
   if [[ "${response}" == "DELETED"* ]]; then
     echo "${response}"
   else
